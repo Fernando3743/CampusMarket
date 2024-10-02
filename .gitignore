@@ -1,0 +1,71 @@
+# Python related
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Django related
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+staticfiles/
+local_settings.py
+
+# If you're using virtual environments
+venv/
+ENV/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# If you're using PyCharm/IntelliJ IDE
+.idea/
+
+# If you're using Visual Studio Code
+.vscode/
+
+# If you're using Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# If you're using Jupyter notebooks
+.ipynb_checkpoints
+
+# If you're using macOS
+.DS_Store
+
+# If you're using Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Test and coverage results
+*.cover
+*.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.coveragerc
+
+# MyPy
+.mypy_cache/
+
+# Pylint and Bandit reports
+pylint-report.txt
+bandit-report.json
+
+# Environments and development tools
+.env
+.env.*
+*.env
