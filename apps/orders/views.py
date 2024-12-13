@@ -1,5 +1,6 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.http import Http404
+from django.contrib import messages
 
 # Create your views here.
 
@@ -39,7 +40,7 @@ class DeleteOrderProductView(LoginRequiredMixin, View):
         # Obtener el ID del objeto OrderProduct a eliminar
         order_product_id = request.POST.get('order_product_id')
         print(order_product_id)
-        
+
         if not order_product_id:
             return redirect('my_order')  # Si no se pasa un id, redirige de vuelta
 
@@ -57,3 +58,39 @@ class DeleteOrderProductView(LoginRequiredMixin, View):
             raise Http404("Producto no encontrado.")
             
         return redirect('my_order')  # Redirigir de vuelta a la vista de la orden
+    
+class CheckoutView(View):
+    def post(self, request, *args, **kwargs):
+        # Buscar el pedido activo del usuario
+        order = Order.objects.filter(user=request.user, is_active=True).first()
+
+        if not order:
+            messages.error(request, "No se encontró un pedido activo.")
+            return redirect('my_order')  # Redirige a la vista de los pedidos
+
+        # Completar la orden
+        total = order.complete_order()
+
+        # Aquí puedes agregar lógica para procesar el pago (como integración con un servicio de pago)
+
+        # Mostrar el recibo
+        messages.success(request, "¡Compra finalizada exitosamente! Puedes ver tu recibo a continuación.")
+        return redirect('receipt', order_id=order.id)  # Redirige al recibo
+
+
+class ReceiptView(View):
+    def get(self, request, *args, **kwargs):
+        order_id = kwargs.get('order_id')
+        order = Order.objects.filter(id=order_id, user=request.user).first()
+
+        if not order:
+            messages.error(request, "No se encontró el recibo.")
+            return redirect('my_order')
+
+        order_products = order.orderproduct_set.all()
+
+        context = {
+            'order': order,
+            'order_products': order_products,
+        }
+        return render(request, 'orders/receipt.html', context)
