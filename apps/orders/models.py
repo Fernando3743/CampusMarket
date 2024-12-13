@@ -10,8 +10,11 @@ from apps.products.models import Product
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
+    is_saved = models.BooleanField(default=False)  # Nuevo campo para carritos guardados
     order_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Total de la orden
+    updated_at = models.DateTimeField(auto_now=True)
+    is_completed = models.BooleanField(default=False)  # Pedido finalizado
 
     def __str__(self):
         return f"order {self.id} by {self.user}"

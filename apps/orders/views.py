@@ -4,7 +4,7 @@ from django.contrib import messages
 
 # Create your views here.
 
-from django.views.generic import DetailView, CreateView, View
+from django.views.generic import DetailView, CreateView, View, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
@@ -94,3 +94,54 @@ class ReceiptView(View):
             'order_products': order_products,
         }
         return render(request, 'orders/receipt.html', context)
+    
+class SavedCartsView(LoginRequiredMixin, View):
+    def get(self, request):
+        # Obtener los carritos guardados del usuario actual
+        saved_carts = Order.objects.filter(
+            user=request.user, 
+            is_saved=True, 
+            is_active=False
+        )
+        print(saved_carts)  # Debugging: Verificar si hay carritos guardados
+
+        context = {
+            'saved_carts': saved_carts,
+        }
+        return render(request, 'orders/saved_carts.html', context)
+
+    def post(self, request):
+        print("Guardando carrito...")  # Esto te dirá si entra a la vista
+        order = Order.objects.filter(user=request.user, is_active=True).first()
+        if not order:
+            messages.error(request, "No tienes un carrito activo para guardar.")
+            return redirect('my_order')
+
+        order.is_active = False
+        order.is_saved = True
+        order.save()
+        messages.success(request, "Carrito guardado exitosamente.")
+        print("Carrito guardado correctamente.")  # Confirmación de ejecución
+        return redirect('my_order')
+
+
+
+class RestoreCartView(View):
+    def post(self, request, cart_id):
+        # Obtener el carrito guardado
+        saved_cart = Order.objects.filter(id=cart_id, user=request.user, is_saved=True).first()
+
+        if not saved_cart:
+            messages.error(request, "Carrito no encontrado o ya restaurado.")
+            return redirect('saved_carts')
+
+        # Desactivar otros carritos activos
+        Order.objects.filter(user=request.user, is_active=True).update(is_active=False)
+
+        # Restaurar el carrito guardado
+        saved_cart.is_active = True
+        saved_cart.is_saved = False
+        saved_cart.save()
+
+        messages.success(request, "Carrito restaurado correctamente.")
+        return redirect('my_order')
